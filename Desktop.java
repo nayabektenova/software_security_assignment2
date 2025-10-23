@@ -1,34 +1,26 @@
 //Desktop computer: adds GPU type
 
-public class Desktop extends Computer { //Inherits from Computer
-    String GPUType=null;
-
-    //Constructors
-    public Desktop() {} //No-arg constructor
+public final class Desktop implements ComputerLike {
+    private final Computer base;   //composition,has-a computer
+    private final String GPUType;
 
     public Desktop(String CPU, String RAM, String disk, String GPUType) {
-        //Inherited from Computer superclass
-        this.CPU=CPU;
-        this.RAM=RAM;
-        this.disk=disk;
-
-        //Only in Desktop subclass
-        this.GPUType=GPUType;
+        this.base = new Computer(CPU, RAM, disk);
+        this.GPUType = GPUType;
     }
 
-    //Setter
-    public void setGPUType(String GPUType) {
-        this.GPUType=GPUType;
-    }
+    //delegate base fields
+    @Override public String getCPU()  { return base.getCPU(); }
+    @Override public String getRAM()  { return base.getRAM(); }
+    @Override public String getDisk() { return base.getDisk(); }
 
-    //Getter
-    public String getGPUType() {
-        return this.GPUType;
-    }
+    public String getGPUType() { return GPUType; }
 
-    //Return formatted version of data
+    @Override public String getTypeLabel() { return "Desktop"; }
+    @Override public String getExtraLabel() { return "GPU:" + GPUType; }
+
+    @Override
     public String toString() {
-        return "Type:Desktop\tCPU:" + this.CPU + "\tRAM:" + this.RAM + "\tDisk:" + this.disk + "\tGPU:" + this.GPUType;
+        return "Type:Desktop\t" + base.toString() + "\tGPU:" + GPUType;
     }
-
 }
