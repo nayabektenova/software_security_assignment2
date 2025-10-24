@@ -1,34 +1,30 @@
 //Laptop computer: adds screen size to other Computer info
 
-public class Laptop extends Computer { //Laptop inherits from Computer
-    String screenSize=null;
+public final class Laptop implements ComputerLike {
+    private final Computer base;   //Composition: Laptop HAS-A Computer
+    private final String screenSize;
 
-    //Constructors
-    public Laptop() {} //No-arg constructor
-
+    //Only constructor - no setters for immutability
     public Laptop(String CPU, String RAM, String disk, String screenSize) {
-        //Inherited from Computer superclass
-        this.CPU=CPU;
-        this.RAM=RAM;
-        this.disk=disk;
-
-        //Only in Laptop subclass
-        this.screenSize=screenSize;
+        this.base = new Computer(CPU, RAM, disk);
+        this.screenSize = screenSize;
     }
 
-    //Setter
-    public void setScreenSize(String screenSize) {
-        this.screenSize=screenSize;
-    }
-
-    //Getter
-    public String getScreenSize() {
-        return this.screenSize;
-    }
-
-    //Return formatted version of data
-    public String toString() {
-        return "Type:Laptop\tCPU:" + this.CPU + "\tRAM:" + this.RAM + "\tDisk:" + this.disk + "\tScreen:" + this.screenSize;
-    }
+    //Delegate base Computer fields to the composed Computer object
+    @Override
+    public String getCPU()  { return base.getCPU(); }
     
+    @Override
+    public String getRAM()  { return base.getRAM(); }
+    
+    @Override
+    public String getDisk() { return base.getDisk(); }
+
+    //Laptop-specific getter
+    public String getScreenSize() { return screenSize; }
+
+    @Override
+    public String toString() {
+        return "Type:Laptop\t" + base.toString() + "\tScreen:" + screenSize;
+    }
 }
