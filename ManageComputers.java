@@ -1,24 +1,33 @@
-//Manage Computers program: maintains an ArrayList of Computer objects, 
-//can be either Laptop or Desktop, but never just Computer-type objects themselves
+//Manage Computers program: maintains an ArrayList of ComputerLike objects
+//can be either Laptop or Desktop
+//Includes whitelist-based input validation for all computer attributes
 
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.Arrays;
+import java.util.List;
 
 public class ManageComputers {
 
+    //Whitelists for input validation - only these values are allowed
+    private static final List<String> VALID_CPU = Arrays.asList("i5", "i7");
+    private static final List<String> VALID_RAM = Arrays.asList("16", "32");
+    private static final List<String> VALID_DISK = Arrays.asList("512", "1024");
+    private static final List<String> VALID_GPU = Arrays.asList("Nvidia", "AMD");
+    private static final List<String> VALID_SCREEN = Arrays.asList("13", "14");
+
     public static void main(String args[]) {
 
-        //This ArrayList will hold all the computers in the system. Note that the type of objects expected in this
-        //ArrayList are Computer, not Laptop or Desktop, but since those are subclasses of Computer they can be
-        //stored in an ArrayLiust<Computer> anyway.
-        ArrayList<Computer> computers = new ArrayList<Computer>(); 
+        //This ArrayList will hold all the computers in the system
+        //Uses ComputerLike interface so both Desktop and Laptop can be stored
+        ArrayList<ComputerLike> computers = new ArrayList<ComputerLike>(); 
 
         Scanner s = new Scanner(System.in);
         String menuOption="";
 
         do { //Start of main program loop
 
-            //Show computer data in ArrayList<Computer>
+            //Show computer data in ArrayList
             showComputers(computers); 
 
             //Display menu and return menu option selected by the user
@@ -27,23 +36,17 @@ public class ManageComputers {
             switch(menuOption) {
                 //Add new computer
                 case "a": 
-
                     addComputer(computers,s);
-
                     break;
 
                 //Delete a computer    
                 case "d": 
-
                     deleteComputer(computers,s);
-
                     break;
 
                 //Edit a computer    
                 case "e": 
-
                     editComputer(computers, s);
-
                     break;
 
             }
@@ -77,15 +80,15 @@ public class ManageComputers {
     } //End of getMenuSelection
 
     //-----------------------------
-    //Show data for all laptops and desktops stored in ArrayList<Computer> create in main() method
-    private static void showComputers(ArrayList<Computer> computers) {
+    //Show data for all laptops and desktops stored in ArrayList
+    private static void showComputers(ArrayList<ComputerLike> computers) {
         int computerListNumber=0; //This variable is used to hold the "list number" for each computer, starting at 1.
 
         System.out.println("=========");
 
         System.out.println("LIST OF COMPUTERS:-");
 
-        for (Computer c: computers) {
+        for (ComputerLike c: computers) {
 
             computerListNumber++; //Increment list number for each computer
 
@@ -98,11 +101,9 @@ public class ManageComputers {
     } //End of showComputers
 
     //-----------------------------
-    //Add a new Laptop or Desktop computer to the ArrayList<Computer>
-    private static void addComputer(ArrayList<Computer> computers, Scanner s) {
+    //Add a new Laptop or Desktop computer to the ArrayList
+    private static void addComputer(ArrayList<ComputerLike> computers, Scanner s) {
         String computerType="";
-
-        Computer tempComputer=null;
 
         System.out.println("ADDING COMPUTER:-");
 
@@ -115,28 +116,28 @@ public class ManageComputers {
             //Add a laptop
             case "l": 
 
-                //Get CPU, RAM and Disk info
-                tempComputer = getComputerData(s); 
-
-                System.out.print("Enter screen size:");
-                String screenSize = s.nextLine();
+                //Get validated CPU, RAM and Disk info
+                String laptopCPU = getValidatedInput(s, "CPU", VALID_CPU);
+                String laptopRAM = getValidatedInput(s, "RAM", VALID_RAM);
+                String laptopDisk = getValidatedInput(s, "Disk", VALID_DISK);
+                String screenSize = getValidatedInput(s, "screen size", VALID_SCREEN);
 
                 //Add new Laptop to ArrayList in main() method
-                computers.add(new Laptop(tempComputer.getCPU(),tempComputer.getRAM(),tempComputer.getDisk(),screenSize)); 
+                computers.add(new Laptop(laptopCPU, laptopRAM, laptopDisk, screenSize)); 
 
                 break;
             
             //Add a desktop    
             case "d": 
 
-            //Get CPU, RAM and Disk info
-                tempComputer = getComputerData(s); 
-
-                System.out.print("Enter GPU:");
-                String GPUType = s.nextLine();
+                //Get validated CPU, RAM and Disk info
+                String desktopCPU = getValidatedInput(s, "CPU", VALID_CPU);
+                String desktopRAM = getValidatedInput(s, "RAM", VALID_RAM);
+                String desktopDisk = getValidatedInput(s, "Disk", VALID_DISK);
+                String GPUType = getValidatedInput(s, "GPU", VALID_GPU);
 
                 //Add new Desktop to ArrayList in main() method
-                computers.add(new Desktop(tempComputer.getCPU(),tempComputer.getRAM(),tempComputer.getDisk(),GPUType)); 
+                computers.add(new Desktop(desktopCPU, desktopRAM, desktopDisk, GPUType)); 
 
                 break;
 
@@ -150,7 +151,7 @@ public class ManageComputers {
 
     //-----------------------------
     //Delete a specified computer from the ArrayList
-    private static void deleteComputer(ArrayList<Computer> computers, Scanner s) {
+    private static void deleteComputer(ArrayList<ComputerLike> computers, Scanner s) {
         int computerListNumberToDelete=0;
 
         System.out.println("DELETE COMPUTER:-");
@@ -170,12 +171,12 @@ public class ManageComputers {
     } //End of deleteComputer
 
     //-----------------------------
-    //Edit a computer. Since Laptop and Desktop are mutable classses/object get new data values and replace old
-    //attribute values in object being edited using object setter methods
-    private static void editComputer(ArrayList<Computer> computers, Scanner s) {
+    //Edit a computer. Since Laptop and Desktop are now immutable classes, we cannot use setter methods.
+    //Instead, we get new data values and create a new object with the updated values, then replace the
+    //old object in the ArrayList with the new one.
+    private static void editComputer(ArrayList<ComputerLike> computers, Scanner s) {
         int computerListNumberToEdit=0;
         String computerType="";
-        Computer tempComputer=null;
 
         System.out.println("EDIT COMPUTER:-");
 
@@ -204,44 +205,36 @@ public class ManageComputers {
             
                     System.out.println("Editing a Laptop:");
 
-                    //Get CPU, RAM and Disk info, store in temporary Computer-type object
-                    tempComputer = getComputerData(s); 
+                    //Get validated new values for all attributes
+                    String newLaptopCPU = getValidatedInput(s, "CPU", VALID_CPU);
+                    String newLaptopRAM = getValidatedInput(s, "RAM", VALID_RAM);
+                    String newLaptopDisk = getValidatedInput(s, "Disk", VALID_DISK);
+                    String newScreenSize = getValidatedInput(s, "screen size", VALID_SCREEN);
 
-                    System.out.print("Enter screen size:");
-                    String screenSize = s.nextLine();
+                    //Create new immutable Laptop object with the new values
+                    Laptop newLaptop = new Laptop(newLaptopCPU, newLaptopRAM, newLaptopDisk, newScreenSize);
 
-                    //Get reference to the object in ArrayList<Computer> to edit
-                    //Cast Computer to Laptop for setScreenSize call a few lines of code later
-                    Laptop laptopToEdit = (Laptop)computers.get(computerListNumberToEdit-1);
-
-                    //Use setter methods to change mutable object state
-                    laptopToEdit.setCPU(tempComputer.getCPU());
-                    laptopToEdit.setRAM(tempComputer.getRAM());
-                    laptopToEdit.setDisk(tempComputer.getDisk());
-                    laptopToEdit.setScreenSize(screenSize);
+                    //Replace the old Laptop object in the ArrayList with the new one
+                    computers.set(computerListNumberToEdit-1, newLaptop);
 
                     break;
 
-                //Editing a desktop, store in temporary Computer-type object
+                //Editing a desktop
                 case "desktop": 
 
                     System.out.println("Editing a Desktop:");
 
-                    //Get CPU, RAM and Disk info
-                    tempComputer = getComputerData(s); 
+                    //Get validated new values for all attributes
+                    String newDesktopCPU = getValidatedInput(s, "CPU", VALID_CPU);
+                    String newDesktopRAM = getValidatedInput(s, "RAM", VALID_RAM);
+                    String newDesktopDisk = getValidatedInput(s, "Disk", VALID_DISK);
+                    String newGPUType = getValidatedInput(s, "GPU", VALID_GPU);
 
-                    System.out.print("Enter GPU:");
-                    String GPUType = s.nextLine();
+                    //Create new immutable Desktop object with the new values
+                    Desktop newDesktop = new Desktop(newDesktopCPU, newDesktopRAM, newDesktopDisk, newGPUType);
 
-                    //Get reference to the object in ArrayList<Computer> to edit
-                    //Cast Computer to Laptop for setScreenSize call a few lines of code later
-                    Desktop desktopToEdit = (Desktop)computers.get(computerListNumberToEdit-1);
-
-                    //Use setter methods to change mutable object state
-                    desktopToEdit.setCPU(tempComputer.getCPU());
-                    desktopToEdit.setRAM(tempComputer.getRAM());
-                    desktopToEdit.setDisk(tempComputer.getDisk());
-                    desktopToEdit.setGPUType(GPUType);
+                    //Replace the old Desktop object in the ArrayList with the new one
+                    computers.set(computerListNumberToEdit-1, newDesktop);
 
                     break;
 
@@ -256,25 +249,27 @@ public class ManageComputers {
     } //End of editComputer
 
     //-----------------------------
-    //Helper method to get data common to Laptop and Desktop (CPU, RAM and disk) objects. Returns a Computer-type object
-    //holding these values as attribues
-    private static Computer getComputerData(Scanner s) {
-        String CPU="";
-        String RAM="";
-        String disk="";
+    //Helper method to get validated input based on a whitelist
+    //Loops until valid input is received from the user
+    private static String getValidatedInput(Scanner s, String fieldName, List<String> validValues) {
+        String input = "";
+        boolean valid = false;
 
-        System.out.print("Enter CPU:");
-        CPU = s.nextLine();
+        while (!valid) {
+            System.out.print("Enter " + fieldName + ":");
+            input = s.nextLine();
 
-        System.out.print("Enter RAM:");
-        RAM = s.nextLine();
+            //Check if input is in the whitelist
+            if (validValues.contains(input)) {
+                valid = true;
+            } else {
+                System.out.println("Invalid " + fieldName + "! Valid values are: " + validValues);
+                System.out.println("Please try again.");
+            }
+        }
 
-        System.out.print("Enter Disk:");
-        disk = s.nextLine();
-
-        return new Computer(CPU,RAM,disk);
-
-    } //End of getComputerData
+        return input;
+    } //End of getValidatedInput
 
 
-} //End of ManageComputer class
+} //End of ManageComputers class
