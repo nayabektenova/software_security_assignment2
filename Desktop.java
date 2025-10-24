@@ -1,6 +1,6 @@
 //Desktop computer: adds GPU type
 
-public final class Desktop implements ComputerLike {
+public final class Desktop implements IComputer {
     private final Computer base;   //composition,has-a computer
     private final String GPUType;
 
