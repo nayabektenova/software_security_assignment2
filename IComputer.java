@@ -1,4 +1,4 @@
-public interface ComputerLike {
+public interface IComputer {
     String getCPU();
     String getRAM();
     String getDisk();
